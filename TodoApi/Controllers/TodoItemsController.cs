@@ -5,7 +5,7 @@ using TodoApi.Models;
 
 namespace TodoApi.Controllers
 {
-    [Route("api/todolists/{listId}/items")]
+    [Route("api/todolists/{listId}")]
     [ApiController]
     public class TodoItemsController : ControllerBase
     {
@@ -16,7 +16,6 @@ namespace TodoApi.Controllers
             _context = context;
         }
 
-        // POST: api/todolists/5/items
         [HttpPost]
         public async Task<ActionResult<TodoItem>> CreateItem(long listId, CreateTodoItem payload)
         {
@@ -37,7 +36,6 @@ namespace TodoApi.Controllers
             return CreatedAtAction(nameof(GetItem), new { listId = listId, itemId = item.Id }, item);
         }
 
-        // GET: api/todolists/5/items/10
         [HttpGet("{itemId}")]
         public async Task<ActionResult<TodoItem>> GetItem(long listId, long itemId)
         {
@@ -51,7 +49,6 @@ namespace TodoApi.Controllers
             return Ok(item);
         }
 
-        // PUT: api/todolists/5/items/10
         [HttpPut("{itemId}")]
         public async Task<ActionResult> UpdateItem(long listId, long itemId, UpdateTodoItem payload)
         {
@@ -68,8 +65,7 @@ namespace TodoApi.Controllers
             return Ok(item);
         }
 
-        // PATCH: api/todolists/5/items/10/complete
-        [HttpPatch("{itemId}/complete")]
+        [HttpPatch("{itemId}")]
         public async Task<ActionResult> CompleteItem(long listId, long itemId)
         {
             var item = await _context.TodoItem
