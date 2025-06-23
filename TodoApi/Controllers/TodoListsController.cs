@@ -27,7 +27,9 @@ namespace TodoApi.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<TodoList>> GetTodoList(long id)
         {
-            var todoList = await _context.TodoList.FindAsync(id);
+            var todoList = await _context.TodoList
+                                         .Include(tl => tl.Items)   // Incluye los TodoItems
+                                         .FirstOrDefaultAsync(tl => tl.Id == id);
 
             if (todoList == null)
             {
@@ -36,6 +38,7 @@ namespace TodoApi.Controllers
 
             return Ok(todoList);
         }
+
 
         // PUT: api/todolists/5
         // To protect from over-posting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
