@@ -17,10 +17,21 @@ public class TodoListsControllerTests
 
     private void PopulateDatabaseContext(TodoContext context)
     {
-        context.TodoList.Add(new TodoList { Id = 1, Name = "Task 1" });
-        context.TodoList.Add(new TodoList { Id = 2, Name = "Task 2" });
+        var list1 = new TodoList { Id = 1, Name = "Task 1" };
+        var list2 = new TodoList { Id = 2, Name = "Task 2" };
+
+        var items = new List<TodoItem>
+    {
+        new TodoItem { Id = 1, Description = "Subtask A", TodoListId = 1 },
+        new TodoItem { Id = 2, Description = "Subtask B", TodoListId = 1 },
+        new TodoItem { Id = 3, Description = "Subtask C", TodoListId = 2 }
+    };
+
+        context.TodoList.AddRange(list1, list2);
+        context.TodoItem.AddRange(items);
         context.SaveChanges();
     }
+
 
     [Fact]
     public async Task GetTodoList_WhenCalled_ReturnsTodoListList()
@@ -35,6 +46,25 @@ public class TodoListsControllerTests
 
             Assert.IsType<OkObjectResult>(result.Result);
             Assert.Equal(2, ((result.Result as OkObjectResult).Value as IList<TodoList>).Count);
+        }
+    }
+
+    [Fact]
+    public async Task GetTodoList_WhenCalled_ReturnsTodoListById_WithItems()
+    {
+        using (var context = new TodoContext(DatabaseContextOptions()))
+        {
+            PopulateDatabaseContext(context);
+            var controller = new TodoListsController(context);
+
+            var result = await controller.GetTodoList(1);
+
+            var okResult = Assert.IsType<OkObjectResult>(result.Result);
+            var todoList = Assert.IsType<TodoList>(okResult.Value);
+
+            Assert.Equal(1, todoList.Id);
+            Assert.NotNull(todoList.Items);
+            Assert.Equal(2, todoList.Items.Count);
         }
     }
 
