@@ -2,6 +2,8 @@
 using System.Threading;
 using System.Linq;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
+using McpClient;
 
 var clientTransport = new StdioClientTransport(new StdioClientTransportOptions
 {
@@ -12,24 +14,29 @@ var clientTransport = new StdioClientTransport(new StdioClientTransportOptions
 
 var client = await McpClientFactory.CreateAsync(clientTransport);
 
-// List tools from server
 var tools = await client.ListToolsAsync();
 foreach (var tool in tools)
 {
-    Console.WriteLine($"🛠 {tool.Name}: {tool.Description}");
+    Console.WriteLine($"🛠️ Tool disponible: {tool.Name}");
 }
 
-// Example: Call CrearItem
-var result = await client.CallToolAsync(
-    "CrearItem",
-    new Dictionary<string, object?>
-    {
-        ["listaId"] = 1,
-        ["descripcion"] = "Terminar informe"
-    },
-    cancellationToken: CancellationToken.None
-);
+// Loop de conversación
+while (true)
+{
+    Console.Write("Prompt > ");
+    var input = Console.ReadLine();
+    if (string.IsNullOrWhiteSpace(input)) break;
 
-// Show result
-Console.WriteLine("\n🧠 Respuesta:");
-Console.WriteLine(result.Content.First(c => c.Type == "text"));
+    var parsed = PromptInterpreter.Interpret(input!);
+    if (parsed == null)
+    {
+        Console.WriteLine("❌ No se pudo interpretar el prompt.");
+        continue;
+    }
+
+    var (toolName, parameters) = parsed.Value;
+
+    Console.WriteLine($"🔧 Invocando tool: {toolName}");
+    var result = await client.CallToolAsync(toolName, parameters);
+    Console.WriteLine($"🟢 Resultado: {result.Content.FirstOrDefault(c => c.Type == "text")}");
+}
