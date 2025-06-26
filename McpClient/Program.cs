@@ -16,10 +16,6 @@ var clientTransport = new StdioClientTransport(new StdioClientTransportOptions
 var client = await McpClientFactory.CreateAsync(clientTransport);
 
 var tools = await client.ListToolsAsync();
-foreach (var tool in tools)
-{
-    Console.WriteLine($"🛠️ Tool disponible: {tool.Name}");
-}
 
 while (true)
 {
