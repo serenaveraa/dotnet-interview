@@ -4,6 +4,7 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using McpClient;
+using ModelContextProtocol.Protocol;
 
 var clientTransport = new StdioClientTransport(new StdioClientTransportOptions
 {
@@ -20,7 +21,6 @@ foreach (var tool in tools)
     Console.WriteLine($"🛠️ Tool disponible: {tool.Name}");
 }
 
-// Loop de conversación
 while (true)
 {
     Console.Write("Prompt > ");
@@ -38,5 +38,10 @@ while (true)
 
     Console.WriteLine($"🔧 Invocando tool: {toolName}");
     var result = await client.CallToolAsync(toolName, parameters);
-    Console.WriteLine($"🟢 Resultado: {result.Content.FirstOrDefault(c => c.Type == "text")}");
+
+    var textBlock = result.Content.FirstOrDefault(c => c is TextContentBlock) as TextContentBlock;
+    if (textBlock != null)
+        Console.WriteLine($"🟢 Resultado: {textBlock.Text}");
+    else
+        Console.WriteLine("🟢 Resultado: (sin contenido de texto)");
 }
